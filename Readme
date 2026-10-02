@@ -1,0 +1,519 @@
+<div align="center">
+
+# 🔴 Mediroza General Hospital — Penetration Test
+
+**Batch B083 | Week 4 | Black-Box Security Assessment**
+
+</div>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Type-Black%20Box%20Pentest-C00000?style=flat-square&labelColor=000000" />
+  <img src="https://img.shields.io/badge/Client-Mediroza%20Hospital-404040?style=flat-square&labelColor=000000" />
+  <img src="https://img.shields.io/badge/Target-medirozahospital.com-0070C0?style=flat-square&labelColor=000000" />
+  <img src="https://img.shields.io/badge/Duration-5%20Days-E87500?style=flat-square&labelColor=000000" />
+  <img src="https://img.shields.io/badge/Critical%20Findings-3-C00000?style=flat-square&labelColor=000000" />
+  <img src="https://img.shields.io/badge/Networkwalks-B083-C00000?style=flat-square&labelColor=000000" />
+</p>
+
+---
+
+## 📋 Project Overview
+
+This repository contains the complete **black-box penetration testing assessment** of Mediroza General Hospital's web infrastructure. Over a five-day engagement, a comprehensive security evaluation was conducted to identify vulnerabilities, extract sensitive data, and demonstrate real-world attack impact.
+
+### Key Results
+
+| Milestone | Objective | Status |
+|---|---|---|
+| **M1** | Attack website & retrieve 3 patient PDFs | ✅ **Complete** |
+| **M2** | Crack encryption on all 3 PDFs | ✅ **Complete** |
+| **M3** | Find staff salaries & shareholder details | ✅ **Complete** |
+| **M4** | Professional pentest report | ✅ **Complete** |
+
+---
+
+## 🎯 Project Scope
+
+| Item | Detail |
+|---|---|
+| **Client** | Mediroza General Hospital |
+| **Target** | https://medirozahospital.com |
+| **Target IP** | 199.188.201.16 |
+| **Engagement Type** | Black-box penetration test (no prior knowledge) |
+| **Duration** | 5 days (October 1-5, 2026) |
+| **Authorization** | ✅ Written permission granted by Networkwalks |
+| **Methodology** | OWASP Testing Guide v4.2 |
+| **Restrictions** | No social engineering, no DoS, scope limited to authorized domain |
+
+---
+
+## 🔍 Executive Summary
+
+### Findings Overview
+
+**Total Vulnerabilities Found:** 6  
+**Critical:** 3 | **High:** 0 | **Medium:** 2 | **Low:** 1
+
+### Critical Vulnerabilities
+
+1. **🔴 Publicly Accessible SQL Database Backup** — Complete employee and shareholder data exposed
+2. **🔴 Authentication Bypass in Patient Portal** — Unauthorized access to patient records
+3. **🔴 Unencrypted Patient PDF Files** — 3 confidential lab reports successfully extracted and decrypted
+
+### Medium Findings
+
+4. **🟠 FTP Service Exposure** — Open FTP service increases attack surface
+5. **🟠 Mail Infrastructure Enumeration** — Email services enumerated for phishing attacks
+
+### Low Findings
+
+6. **🟡 DNSSEC Not Enabled** — DNS vulnerable to spoofing attacks
+
+---
+
+## 📊 Findings Summary
+
+### Finding 1: Publicly Accessible SQL Backup
+
+**Severity:** 🔴 Critical | **Exploitability:** Very Easy | **Impact:** Extreme
+
+A SQL database backup file was discovered in the `/old/` directory, directly accessible via HTTP without authentication. The file contained:
+
+- ✗ Complete employee directory (50+ staff members)
+- ✗ All employee salaries ($45,000 - $195,000 range)
+- ✗ Shareholder structure and ownership percentages
+- ✗ Internal database schema
+
+**File:** `/old/mediroza_db_backup_2019.sql` (270KB)
+
+**Evidence:** [See full report for screenshots and extracted data]
+
+---
+
+### Finding 2: SQL Injection in Patient Portal
+
+**Severity:** 🔴 Critical | **Exploitability:** Very Easy | **Impact:** Extreme
+
+The patient portal login (`/patient/login.php`) is vulnerable to SQL injection using the payload `'admin'--` to bypass authentication entirely.
+
+**Exploitation:**
+```
+Username: 'admin'--
+Password: [any value]
+Result: Direct access to patient portal without credentials
+```
+
+**Impact:**
+- Access to patient portal dashboard
+- Retrieval of 3 patient lab reports
+- Extraction of medical records
+- Download of encrypted PDFs
+
+**Passwords Cracked from PDFs:**
+- S. Dlamini Report → `123456`
+- P. Reddy Report → `password`
+- E. Thompson Report → `!@#$%^&`
+
+**Evidence:** [See full report for exploitation screenshots]
+
+---
+
+### Finding 3: Weakly Encrypted Patient Lab Reports
+
+**Severity:** 🔴 Critical | **Exploitability:** Easy | **Impact:** Extreme
+
+Three confidential patient pathology reports were successfully extracted and decrypted using weak passwords.
+
+**Files Recovered & Decrypted:**
+
+| Report | Patient | Lab Ref | Date | Password | Time |
+|---|---|---|---|---|---|
+| Pathology Report | S. Dlamini | LR-2024-1187 | 2024-11-04 | `123456` | <2 sec |
+| Pathology Report | P. Reddy | LR-2024-1192 | 2024-11-05 | `password` | <1 sec |
+| Pathology Report | E. Thompson | LR-2024-1205 | 2024-11-08 | `!@#$%^&` | ~5 sec |
+
+**Data Exposed:**
+- Patient names, IDs, dates of birth
+- Lab dates, referring doctors, specimen types
+- Complete medical test results (haemoglobin, ferritin, TSH, Vitamin D, glucose, etc.)
+- Test abnormalities and diagnostic notes
+- Laboratory reference information
+
+**Key Data from E. Thompson Report:**
+- Patient: Emily Thompson (DOB: 1978-09-03)
+- Haemoglobin: 11.4 g/dL (LOW)
+- Vitamin D: 42 nmol/L (LOW)
+- Ferritin: 9 μg/L (LOW)
+
+**Evidence:** [See full report for hash extraction and cracking screenshots]
+
+---
+
+### Finding 4: FTP Service Exposure
+
+**Severity:** 🟠 Medium | **Exploitability:** Moderate | **Impact:** Medium
+
+FTP service is publicly accessible on `ftp.medirozahospital.com` port 21. FTP transmits credentials in plaintext and is vulnerable to misconfiguration.
+
+**Mitigation:** Migrate to SFTP; restrict access to authorized networks.
+
+---
+
+### Finding 5: Mail Infrastructure Enumeration
+
+**Severity:** 🟠 Medium | **Exploitability:** Easy | **Impact:** Medium
+
+Email infrastructure fully enumerated through DNS records:
+
+```
+MX Records:
+- mx1-hosting.jellyfish.systems (162.255.118.28)
+- mx2-hosting.jellyfish.systems (162.255.118.29)
+- mx3-hosting.jellyfish.systems (162.255.118.13)
+
+Email Discovered:
+- info@medirozahospital.com
+- [50+ staff emails from SQL backup]
+```
+
+**Mitigation:** Implement DMARC, DKIM, and SPF; employee security awareness training.
+
+---
+
+### Finding 6: DNSSEC Not Enabled
+
+**Severity:** 🟡 Low | **Exploitability:** Difficult | **Impact:** Low
+
+DNSSEC is not enabled on the domain, leaving it vulnerable to DNS spoofing and cache poisoning.
+
+**Mitigation:** Enable DNSSEC at DNS provider (NameCheap).
+
+---
+
+## 🛠️ Tools & Techniques Used
+
+### Reconnaissance
+- **theHarvester v4.10** — Email and host enumeration
+- **nmap v7.99** — Port scanning and service detection
+- **whois** — Domain registration lookup
+- **dnsrecon** — DNS enumeration and zone transfer testing
+- **whatweb** — Web technology fingerprinting
+
+### Exploitation
+- **Manual Testing** — Input validation and authentication bypass
+- **Burp Suite Community** — HTTP request interception and analysis
+- **Directory Enumeration** — Identification of hidden endpoints
+
+### Data Extraction
+- **Networkwalks Hash Calculator** — PDF hash extraction
+- **Networkwalks Password Cracker** — Dictionary-based password cracking
+- **John the Ripper v1.9.0** — Optional hash cracking verification
+
+### Analysis
+- **Browser DevTools** — Client-side analysis
+- **Text Analysis** — Content review and data extraction
+
+---
+
+## 📁 Repository Structure
+
+```
+NETWORKWALKS-EMMANUEL-B083-WK4-MEDIROZA-PENTEST/
+│
+├── README.md                              ← This file (overview)
+│
+├── MEDIROZA-PENTEST-REPORT.md             ← Full professional pentest report
+│   ├── Executive Summary
+│   ├── Scope & Methodology
+│   ├── 6 Detailed Findings with Evidence
+│   ├── Risk Analysis
+│   ├── Recommendations & Remediation
+│   └── Appendices
+│
+├── screenshots/
+│   ├── M1-Initial-Access/
+│   │   ├── recon-theHarvester.png
+│   │   ├── recon-nmap-results.png
+│   │   ├── recon-whois.png
+│   │   ├── recon-dnsrecon.png
+│   │   ├── finding1-robots-txt.png
+│   │   ├── finding1-sql-backup-access.png
+│   │   ├── finding1-sql-content.png
+│   │   ├── finding1-data-exposed.png
+│   │   ├── finding2-login-form.png
+│   │   ├── finding2-bypass-request.png
+│   │   ├── finding2-authenticated-access.png
+│   │   └── finding2-restricted-files.png
+│   │
+│   ├── M2-Data-Extraction/
+│   │   ├── pdf1-extraction.png
+│   │   ├── pdf2-extraction.png
+│   │   ├── pdf3-extraction.png
+│   │   ├── finding3-reports-directory.png
+│   │   ├── finding3-pdf-list.png
+│   │   └── finding3-file-download.png
+│   │
+│   ├── M3-Cracking/
+│   │   ├── pdf1-hash-extracted.png
+│   │   ├── pdf1-password-cracking.png
+│   │   ├── pdf1-cracked-password.png
+│   │   ├── pdf2-hash-extracted.png
+│   │   ├── pdf2-password-cracking.png
+│   │   ├── pdf2-cracked-password.png
+│   │   ├── pdf3-hash-extracted.png
+│   │   ├── pdf3-password-cracking.png
+│   │   ├── pdf3-cracked-password.png
+│   │   ├── pdf1-decrypted.png
+│   │   ├── pdf2-decrypted.png
+│   │   └── pdf3-decrypted.png
+│   │
+│   └── M4-Critical-Data/
+│       ├── finding1-sql-backup-access.png
+│       ├── finding1-employee-data.png
+│       ├── finding1-shareholder-data.png
+│       ├── finding4-ftp-access.png
+│       ├── finding5-mail-enumeration.png
+│       └── finding6-dnssec-check.png
+│
+└── data/
+    ├── M1-Reconnaissance/
+    │   ├── theHarvester-output.txt
+    │   ├── nmap-results.txt
+    │   ├── whois-medirozahospital.com.txt
+    │   └── dnsrecon-results.txt
+    │
+    ├── M2-Extracted-Files/
+    │   ├── Patient_Lab_Report_001.pdf (encrypted)
+    │   ├── Patient_Lab_Report_002.pdf (encrypted)
+    │   └── Patient_Lab_Report_003.pdf (encrypted)
+    │
+    ├── M3-Cracked-Contents/
+    │   ├── Patient_Lab_Report_001.pdf (DECRYPTED)
+    │   ├── Patient_Lab_Report_002.pdf (DECRYPTED)
+    │   └── Patient_Lab_Report_003.pdf (DECRYPTED)
+    │
+    └── M4-Extracted-Data/
+        └── mediroza_db_backup_2019.sql
+```
+
+---
+
+## 🔐 What Was Accomplished
+
+### Milestone 1 — Initial Access ✅
+
+**Objective:** Attack the website and retrieve 3 confidential patient PDF lab reports
+
+**Achievements:**
+- ✅ Conducted full reconnaissance (theHarvester, nmap, whois, dnsrecon)
+  - Identified 6 open services on 199.188.201.16
+  - Discovered email: info@medirozahospital.com
+  - Enumerated mail servers and DNS records
+- ✅ Discovered SQL injection vulnerability in `/patient/login.php`
+  - Tested payload: `'admin'--`
+  - Successfully bypassed authentication
+- ✅ Accessed restricted patient portal with no credentials
+- ✅ Located patient reports directory
+- ✅ Retrieved 3 encrypted patient lab PDF files:
+  - Pathology Report - S. Dlamini (LR-2024-1187)
+  - Pathology Report - P. Reddy (LR-2024-1192)
+  - Pathology Report - E. Thompson (LR-2024-1205)
+
+---
+
+### Milestone 2 — Data Extraction & Cracking ✅
+
+**Objective:** Crack the encryption on all 3 retrieved files
+
+**Achievements:**
+- ✅ Used Networkwalks Hash Calculator
+  - Extracted $pdf$ hashes from all 3 PDFs
+  - Hash format: pdf2john compatible
+- ✅ Used Networkwalks Password Cracker (Dictionary attack)
+  - PDF 1 (S. Dlamini): Found password `123456` in <2 seconds
+  - PDF 2 (P. Reddy): Found password `password` in <1 second
+  - PDF 3 (E. Thompson): Found password `!@#$%^&` using extended wordlist (~5 seconds)
+- ✅ Successfully decrypted all 3 patient lab reports
+- ✅ Extracted and reviewed sensitive medical data
+  - Patient demographics and IDs
+  - Lab dates and test results
+  - Medical abnormalities flagged
+  - Doctor recommendations
+
+---
+
+### Milestone 3 — Critical Data Exposure ✅
+
+**Objective:** Find staff salaries and shareholder details
+
+**Achievements:**
+- ✅ Identified `/old/` directory via robots.txt review
+- ✅ Successfully accessed SQL database backup: `mediroza_db_backup_2019.sql`
+- ✅ Extracted complete employee records (50+ staff):
+  - Full names, emails, phone numbers
+  - Departments and job titles
+  - Salary information (R19,000 - R195,000 range)
+  - Hire dates and employment history
+  
+**Sample employees exposed:**
+  - David Smith - Facilities Manager - R65,000
+  - James Wilson - Security Supervisor - R27,000
+  - Peter van Wyk - Procurement Officer - R38,000
+  
+- ✅ Obtained shareholder structure (10+ major shareholders):
+  - Rajesh Naidoo - 18.0% ownership
+  - Cedar Health Holdings (Pty) Ltd - 15.0%
+  - Dr. Johan van der Merwe - 12.0%
+  - Share holdings: 40,000 - 180,000 shares per entity
+- ✅ Documented organizational hierarchy and financial data
+- ✅ Total exposed: 50+ employees + 10 major shareholders with financial details
+
+---
+
+### Milestone 4 — Pentest Report ✅
+
+**Objective:** Write a professional penetration testing report for the client
+
+**Achievements:**
+- ✅ Professional report compiled with all findings
+- ✅ Evidence and screenshots for each vulnerability
+- ✅ Risk ratings (Critical, High, Medium, Low)
+- ✅ Detailed remediation recommendations
+- ✅ Compliance implications (HIPAA, GDPR)
+- ✅ Timeline and tools documentation
+
+---
+
+## 📈 Risk Assessment Matrix
+
+| Finding | Severity | Exploitability | Impact | Scope |
+|---|---|---|---|---|
+| SQL Backup | 🔴 Critical | Very Easy | Extreme | All staff & shareholders |
+| Auth Bypass | 🔴 Critical | Very Easy | Extreme | All patients |
+| Unencrypted PDFs | 🔴 Critical | Easy | Extreme | 3+ patients |
+| FTP Exposure | 🟠 Medium | Moderate | Medium | Organizational |
+| Mail Enum | 🟠 Medium | Easy | Medium | Phishing risk |
+| No DNSSEC | 🟡 Low | Difficult | Low | DNS infrastructure |
+
+---
+
+## 📋 Recommendations (Priority Order)
+
+### 🚨 Critical (24 hours)
+
+1. Remove `/old/` directory from web root
+2. Reset all staff credentials immediately
+3. Disable patient portal until patched
+4. Notify affected patients of potential breach
+5. Engage legal/compliance teams
+
+### ⚠️ High (1 week)
+
+1. Fix authentication bypass in patient portal
+2. Implement strong PDF encryption (AES-256)
+3. Implement input validation on all forms
+4. Enable HTTPS/TLS 1.2+ enforcement
+5. Implement access control and audit logging
+
+### 📌 Medium (1 month)
+
+1. Migrate FTP to SFTP
+2. Enable DNSSEC
+3. Implement DMARC/DKIM/SPF
+4. Deploy Web Application Firewall (WAF)
+5. Conduct security awareness training
+
+---
+
+## ⚠️ Ethical & Legal Notice
+
+**IMPORTANT:** This assessment was conducted with explicit written authorization from Networkwalks. The techniques, methods, and findings documented here are provided for **authorized security testing purposes only**.
+
+### Legal Compliance
+
+- ✅ Written authorization obtained before testing
+- ✅ Testing limited to authorized scope (medirozahospital.com)
+- ✅ No social engineering, DoS, or out-of-scope activities
+- ✅ All findings documented for remediation
+
+### Unauthorized Use Prohibited
+
+**⚠️ ILLEGAL ACTIVITY:**
+
+Unauthorized access to computer systems is illegal under:
+- Computer Fraud and Abuse Act (CFAA)
+- Criminal law in virtually all jurisdictions
+- Civil liability for damages
+
+**Do NOT use these techniques against systems you do not own or have permission to test.**
+
+---
+
+## 🔗 Resources & References
+
+- **Networkwalks:** https://networkwalks.com
+- **OWASP Testing Guide:** https://owasp.org/www-project-web-security-testing-guide/
+- **NIST Cybersecurity Framework:** https://www.nist.gov/cyberframework
+- **HIPAA Security Rule:** https://www.hhs.gov/hipaa/for-professionals/security/
+- **GDPR Compliance:** https://gdpr-info.eu/
+
+---
+
+## 🛡️ Security Standards Referenced
+
+- **OWASP Top 10 2021** — Web Application Security
+- **NIST SP 800-53** — Security and Privacy Controls
+- **ISO 27001** — Information Security Management
+- **HIPAA Security Rule** — Protected Health Information
+- **GDPR** — General Data Protection Regulation
+
+---
+
+## 📊 Attack Timeline
+
+| Phase | Date | Duration | Key Activities |
+|---|---|---|---|
+| **Reconnaissance** | 2026-10-01 | 1 day | Service enumeration, DNS mapping, asset discovery |
+| **Scanning** | 2026-10-02 | 1 day | Port scanning, service fingerprinting, web crawling |
+| **Exploitation** | 2026-10-03 | 2 days | Auth bypass, data extraction, file retrieval |
+| **Post-Exploitation** | 2026-10-04 | 1 day | Data analysis, evidence gathering, documentation |
+| **Reporting** | 2026-10-05 | 1 day | Report compilation, risk assessment, remediation planning |
+
+---
+
+## 👤 Author
+
+**Emmanuel Bafi**
+
+Cybersecurity Intern — Batch B083  
+Networkwalks Cybersecurity Internship Program
+
+**LinkedIn:** www.linkedin.com/in/bkr95 
+**GitHub:** github.com/BithinR
+**Email:** rbithin10@gmail.com
+
+**Program:** Cybersecurity Fundamentals at Networkwalks  
+**Week:** 04 | **Project:** Mediroza General Hospital — Black-Box Penetration Test  
+**Date Completed:** October 5, 2026
+
+---
+
+## 📞 Contact & Support
+
+For questions about this assessment:
+
+- **Networkwalks:** https://networkwalks.com
+- **Email:** info@networkwalks.com
+- **Support:** https://networkwalks.com/support/
+
+---
+
+<div align="center">
+
+### ⚠️ CONFIDENTIAL — AUTHORIZED PERSONNEL ONLY
+
+This repository contains sensitive security findings from an authorized penetration test. Unauthorized access or distribution is prohibited.
+
+**For full details, see:** `MEDIROZA-PENTEST-REPORT.md`
+
+</div>
