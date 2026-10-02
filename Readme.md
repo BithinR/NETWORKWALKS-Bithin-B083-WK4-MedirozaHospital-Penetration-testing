@@ -219,72 +219,13 @@ DNSSEC is not enabled on the domain, leaving it vulnerable to DNS spoofing and c
 ```
 NETWORKWALKS-EMMANUEL-B083-WK4-MEDIROZA-PENTEST/
 │
-├── README.md                              ← This file (overview)
+├── README.md                              
 │
-├── MEDIROZA-PENTEST-REPORT.md             ← Full professional pentest report
-│   ├── Executive Summary
-│   ├── Scope & Methodology
-│   ├── 6 Detailed Findings with Evidence
-│   ├── Risk Analysis
-│   ├── Recommendations & Remediation
-│   └── Appendices
+├── MEDIROZA-PENTEST-REPORT.md             
 │
 ├── screenshots/
-│   ├── M1-Initial-Access/
-│   │   ├── recon-theHarvester.png
-│   │   ├── recon-nmap-results.png
-│   │   ├── recon-whois.png
-│   │   ├── recon-dnsrecon.png
-│   │   ├── finding1-robots-txt.png
-│   │   ├── finding1-sql-backup-access.png
-│   │   ├── finding1-sql-content.png
-│   │   ├── finding1-data-exposed.png
-│   │   ├── finding2-login-form.png
-│   │   ├── finding2-bypass-request.png
-│   │   ├── finding2-authenticated-access.png
-│   │   └── finding2-restricted-files.png
-│   │
-│   ├── M2-Data-Extraction/
-│   │   ├── pdf1-extraction.png
-│   │   ├── pdf2-extraction.png
-│   │   ├── pdf3-extraction.png
-│   │   ├── finding3-reports-directory.png
-│   │   ├── finding3-pdf-list.png
-│   │   └── finding3-file-download.png
-│   │
-│   ├── M3-Cracking/
-│   │   ├── pdf1-hash-extracted.png
-│   │   ├── pdf1-password-cracking.png
-│   │   ├── pdf1-cracked-password.png
-│   │   ├── pdf2-hash-extracted.png
-│   │   ├── pdf2-password-cracking.png
-│   │   ├── pdf2-cracked-password.png
-│   │   ├── pdf3-hash-extracted.png
-│   │   ├── pdf3-password-cracking.png
-│   │   ├── pdf3-cracked-password.png
-│   │   ├── pdf1-decrypted.png
-│   │   ├── pdf2-decrypted.png
-│   │   └── pdf3-decrypted.png
-│   │
-│   └── M4-Critical-Data/
-│       ├── finding1-sql-backup-access.png
-│       ├── finding1-employee-data.png
-│       ├── finding1-shareholder-data.png
-│       ├── finding4-ftp-access.png
-│       ├── finding5-mail-enumeration.png
-│       └── finding6-dnssec-check.png
 │
 └── data/
-    ├── M1-Reconnaissance/
-    │   ├── theHarvester-output.txt
-    │   ├── nmap-results.txt
-    │   ├── whois-medirozahospital.com.txt
-    │   └── dnsrecon-results.txt
-    │
-    ├── M2-Extracted-Files/
-    │   ├── Patient_Lab_Report_001.pdf (encrypted)
-    │   ├── Patient_Lab_Report_002.pdf (encrypted)
-    │   └── Patient_Lab_Report_003.pdf (encrypted)
     │
     ├── M3-Cracked-Contents/
     │   ├── Patient_Lab_Report_001.pdf (DECRYPTED)
